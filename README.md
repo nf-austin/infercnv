@@ -43,7 +43,25 @@ nextflow run nf-austin/infercnv \
 
 ## Input expectations
 
-Each input `.h5ad` should contain raw integer counts in `adata.X` and meaningful `var_names` (gene symbols) that overlap with the Ensembl GTF (gene_name attribute). The file basename (without `.h5ad`) becomes the sample ID.
+Each input `.h5ad` should contain:
+
+- Raw integer counts in `adata.X`.
+- Gene symbols in `adata.var_names` matching the Ensembl GTF `gene_name` attribute (HGNC for human, MGI for mouse).
+- Optionally a boolean `adata.obs["passing_qc"]` column — if present, only cells where it is `True` are clustered and passed to InferCNV.
+
+The file basename (without `.h5ad`) becomes the sample ID.
+
+### Pairing with `nf-austin/scrnaseq`
+
+[`nf-austin/scrnaseq`](https://github.com/nf-austin/scrnaseq) emits per-sample `{sample_id}_annotated.h5ad` from its SCANPY_QC step, with raw counts in `.X`, gene-symbol `var_names`, and a `passing_qc` flag on `.obs`. Those files drop directly into this pipeline:
+
+```bash
+nextflow run nf-austin/infercnv \
+    -profile docker \
+    --h5ad_dir "scrnaseq_results/qc/*/*_annotated.h5ad" \
+    --species "human" \
+    --release "114"
+```
 
 ## Output structure
 

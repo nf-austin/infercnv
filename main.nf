@@ -10,7 +10,7 @@ include { CONCAT_H5ADS }      from './modules/concat_h5ads/main.nf'
 
 workflow {
     Channel.fromPath(params.h5ad_dir)
-        | map { file -> tuple(file.baseName, file) }
+        | map { file -> tuple(file.baseName.replaceFirst(/_annotated$/, ''), file) }
         | set { ch_samples }
 
     PREPARE_REFERENCE(params.species, params.release)

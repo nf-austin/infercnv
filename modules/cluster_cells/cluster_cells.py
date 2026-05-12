@@ -11,6 +11,12 @@ def main():
     args = parser.parse_args()
 
     adata = sc.read_h5ad(args.h5ad)
+
+    # Honor upstream QC if present (e.g. scrnaseq SCANPY_QC writes passing_qc
+    # but does not subset).
+    if "passing_qc" in adata.obs.columns:
+        adata = adata[adata.obs["passing_qc"]].copy()
+
     bdata = adata.copy()
 
     sc.pp.normalize_total(bdata, target_sum=1e4)
