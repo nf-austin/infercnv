@@ -1,6 +1,6 @@
 process RUN_INFERCNV {
     tag { sample_id }
-    publishDir "${params.outdir}/${sample_id}_infercnv", mode: 'copy'
+    publishDir { "${params.outdir}/${sample_id}_infercnv" }, mode: 'copy'
 
     conda "${moduleDir}/environment.yml"
 
