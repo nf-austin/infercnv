@@ -14,6 +14,7 @@ process RUN_INFERCNV {
 
     script:
     """
+    export BASILISK_EXTERNAL_DIR="\${PWD}/.basilisk"
     Rscript ${moduleDir}/run_infercnv.R \\
         --h5ad ${h5ad} \\
         --annotations ${annotations} \\
