@@ -5,7 +5,7 @@ import scanpy as sc
 def main():
     parser = argparse.ArgumentParser(description="Cluster cells to build a global expression baseline.")
     parser.add_argument("--h5ad", required=True, help="Input h5ad file")
-    parser.add_argument("--resolution", type=float, default=0.5, help="Leiden clustering resolution")
+    parser.add_argument("--resolution", type=float, default=1.0, help="Leiden clustering resolution")
     parser.add_argument("--out_annotations", required=True, help="Output TSV for InferCNV")
     parser.add_argument("--out_h5ad", required=True, help="Output annotated h5ad file")
     args = parser.parse_args()

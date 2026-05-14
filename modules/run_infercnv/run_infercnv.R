@@ -10,6 +10,7 @@ option_list <- list(
     make_option(c("--annotations"), type="character", default=NULL, help="Barcode to cluster annotations"),
     make_option(c("--gene_order"), type="character", default=NULL, help="Genomic position file"),
     make_option(c("--cutoff"), type="double", default=0.1, help="Count cutoff threshold"),
+    make_option(c("--threads"), type="integer", default=4L, help="Number of threads"),
     make_option(c("--out_dir"), type="character", default=".", help="Output directory")
 )
 
@@ -42,5 +43,6 @@ infercnv_obj <- infercnv::run(
     denoise           = TRUE,
     HMM               = TRUE,
     analysis_mode     = "subclusters",
-    no_plot           = FALSE
+    no_plot           = FALSE,
+    num_threads       = opt$threads
 )

@@ -29,17 +29,17 @@ nextflow run nf-austin/infercnv \
 
 ## Parameters
 
-| Parameter      | Default        | Description                                          |
-| -------------- | -------------- | ---------------------------------------------------- |
-| `--h5ad_dir`   | `data/*.h5ad`  | Glob pattern matching one h5ad per sample.           |
-| `--outdir`     | `results`      | Where published outputs are written.                 |
-| `--species`    | `human`        | Species passed to `gget ref`.                        |
-| `--release`    | `114`          | Ensembl release used for the GTF download.           |
-| `--resolution` | `0.5`          | Leiden clustering resolution.                        |
-| `--cutoff`     | `0.1`          | Minimum mean expression cutoff for InferCNV.         |
-| `--max_memory` | `128.GB`       | Cap applied via `process.resourceLimits`.            |
-| `--max_cpus`   | `32`           | Cap applied via `process.resourceLimits`.            |
-| `--max_time`   | `72.h`         | Cap applied via `process.resourceLimits`.            |
+| Parameter      | Default       | Description                                          |
+| -------------- |---------------| ---------------------------------------------------- |
+| `--h5ad_dir`   | `data/*.h5ad` | Glob pattern matching one h5ad per sample.           |
+| `--outdir`     | `results`     | Where published outputs are written.                 |
+| `--species`    | `human`       | Species passed to `gget ref`.                        |
+| `--release`    | `114`         | Ensembl release used for the GTF download.           |
+| `--resolution` | `1.0`         | Leiden clustering resolution.                        |
+| `--cutoff`     | `0.1`         | Minimum mean expression cutoff for InferCNV.         |
+| `--max_memory` | `128.GB`      | Cap applied via `process.resourceLimits`.            |
+| `--max_cpus`   | `32`          | Cap applied via `process.resourceLimits`.            |
+| `--max_time`   | `72.h`        | Cap applied via `process.resourceLimits`.            |
 
 ## Input expectations
 

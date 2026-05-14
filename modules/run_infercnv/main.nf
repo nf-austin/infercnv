@@ -20,6 +20,7 @@ process RUN_INFERCNV {
         --annotations ${annotations} \\
         --gene_order ${gene_order} \\
         --cutoff ${cutoff} \\
+        --threads ${task.cpus} \\
         --out_dir infercnv_out
     """
 }
