@@ -1,0 +1,241 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/nf-austin/infercnv/main/nextflow_schema.json",
+  "title": "nf-austin/infercnv pipeline parameters",
+  "description": "Automated InferCNV pipeline with clustering, CIN scoring, and matrix concatenation",
+  "type": "object",
+  "definitions": {
+    "input_output_options": {
+      "title": "Input/output options",
+      "type": "object",
+      "fa_icon": "fas fa-terminal",
+      "description": "Where the count matrices come from and where results go.",
+      "required": [
+        "outdir"
+      ],
+      "properties": {
+        "input": {
+          "type": "string",
+          "format": "file-path",
+          "exists": true,
+          "schema": "assets/schema_input.json",
+          "mimetype": "text/csv",
+          "pattern": "^\\S+\\.(csv|tsv|txt)$",
+          "fa_icon": "fas fa-file-csv",
+          "description": "Samplesheet CSV listing the samples to run.",
+          "help_text": "Columns: `sample` and `h5ad`. One row per sample; `sample` becomes the output subdirectory name and must be unique. Use this rather than `--h5ad_dir` when launching from Seqera Platform. Mutually exclusive with `--h5ad_dir`."
+        },
+        "h5ad_dir": {
+          "type": "string",
+          "fa_icon": "fas fa-folder",
+          "description": "Ad-hoc alternative to a samplesheet: a glob matching .h5ad files, e.g. 'data/*.h5ad'.",
+          "help_text": "The sample id is taken from each filename with any trailing `_annotated` stripped. Mutually exclusive with `--input`."
+        },
+        "outdir": {
+          "type": "string",
+          "default": "results",
+          "format": "directory-path",
+          "fa_icon": "fas fa-folder-open",
+          "description": "Output directory. Use an absolute path on a cluster or on cloud storage."
+        }
+      }
+    },
+    "reference_options": {
+      "title": "Reference options",
+      "type": "object",
+      "fa_icon": "fas fa-dna",
+      "description": "Gene-order file InferCNV uses to place genes on chromosomes.",
+      "properties": {
+        "gene_order": {
+          "type": "string",
+          "format": "file-path",
+          "exists": true,
+          "fa_icon": "fas fa-map",
+          "description": "Pre-built genomic_positions.txt. Skips PREPARE_REFERENCE entirely.",
+          "help_text": "The recommended path on HPC: PREPARE_REFERENCE downloads an Ensembl GTF at runtime, and compute nodes usually have no outbound network. Build it once on a login node and pass the path here."
+        },
+        "gtf": {
+          "type": "string",
+          "format": "file-path",
+          "exists": true,
+          "fa_icon": "fas fa-file-archive",
+          "description": "Pre-downloaded Ensembl GTF (.gtf or .gtf.gz). Skips only the download, still builds the gene-order file.",
+          "help_text": "Use when you want the pipeline to build the positions file but cannot reach Ensembl from the compute node."
+        },
+        "species": {
+          "type": "string",
+          "default": "human",
+          "fa_icon": "fas fa-paw",
+          "description": "Ensembl species name used to auto-download the GTF.",
+          "help_text": "Only used when neither --gene_order nor --gtf is given."
+        },
+        "release": {
+          "type": "string",
+          "default": "114",
+          "fa_icon": "fas fa-tag",
+          "description": "Ensembl release used to auto-download the GTF.",
+          "help_text": "Only used when neither --gene_order nor --gtf is given."
+        }
+      }
+    },
+    "analysis_options": {
+      "title": "Clustering and InferCNV options",
+      "type": "object",
+      "fa_icon": "fas fa-chart-area",
+      "description": "How cells are clustered and CNVs called.",
+      "properties": {
+        "resolution": {
+          "type": "number",
+          "default": 1.0,
+          "fa_icon": "fas fa-object-group",
+          "description": "Leiden clustering resolution. Higher gives more, smaller clusters."
+        },
+        "cutoff": {
+          "type": "number",
+          "default": 0.1,
+          "fa_icon": "fas fa-filter",
+          "description": "InferCNV expression cutoff: minimum mean count per gene across cells.",
+          "help_text": "Upstream recommends 1 for Smart-seq2 and 0.1 for 10x-style droplet data."
+        }
+      }
+    },
+    "container_options": {
+      "title": "Container options",
+      "type": "object",
+      "fa_icon": "fas fa-cubes",
+      "description": "Which images the processes run in.",
+      "properties": {
+        "infercnv_container": {
+          "type": "string",
+          "default": "ghcr.io/nf-austin/infercnv:1.2.0",
+          "fa_icon": "fas fa-box",
+          "description": "R/Bioconductor image carrying InferCNV and zellkonverter, used by RUN_INFERCNV.",
+          "hidden": true
+        },
+        "infercnv_py_container": {
+          "type": "string",
+          "default": "ghcr.io/nf-austin/infercnv:1.2.0-py",
+          "fa_icon": "fas fa-box",
+          "description": "Python/scanpy image used by the clustering, annotation, concat and reference steps.",
+          "hidden": true
+        }
+      }
+    },
+    "execution_options": {
+      "title": "Execution environment",
+      "type": "object",
+      "fa_icon": "fas fa-server",
+      "description": "Cluster scheduler, image caches and bind mounts. Relevant when running on HPC.",
+      "help_text": "Use the `slurm` profile together with an engine profile: `-profile slurm,singularity`. On Seqera Platform a SLURM compute environment already sets the executor, so you normally only need the cache and bind settings here.",
+      "properties": {
+        "slurm_queue": {
+          "type": "string",
+          "fa_icon": "fas fa-stream",
+          "description": "SLURM partition to submit to (sbatch --partition).",
+          "help_text": "Only used with `-profile slurm`. Left unset, no --partition flag is emitted and the cluster default applies."
+        },
+        "slurm_account": {
+          "type": "string",
+          "fa_icon": "fas fa-id-card",
+          "description": "SLURM account to charge (sbatch --account).",
+          "hidden": true
+        },
+        "cluster_options": {
+          "type": "string",
+          "fa_icon": "fas fa-sliders-h",
+          "description": "Raw sbatch options appended to every job, e.g. '--qos=long'.",
+          "hidden": true
+        },
+        "singularity_cache_dir": {
+          "type": "string",
+          "format": "directory-path",
+          "fa_icon": "fas fa-hdd",
+          "description": "Shared directory for pulled Singularity images.",
+          "help_text": "Put this on shared storage the compute nodes can read. $HOME is quota-limited and is not always mounted on compute nodes. Defaults to NXF_SINGULARITY_CACHEDIR, then Nextflow's own $NXF_HOME location."
+        },
+        "conda_cache_dir": {
+          "type": "string",
+          "format": "directory-path",
+          "fa_icon": "fas fa-hdd",
+          "description": "Shared directory for created conda environments.",
+          "hidden": true
+        },
+        "singularity_bind": {
+          "type": "string",
+          "fa_icon": "fas fa-link",
+          "description": "Extra paths to bind into the container, comma-separated, e.g. '/mnt/gpfs,/scratch'.",
+          "help_text": "autoMounts only binds paths Nextflow itself resolved. HPC filesystems are routinely symlinked (/data -> /mnt/gpfs/...), which shows up as 'file not found' inside the container even though the host path exists. Bind the real parent here."
+        }
+      }
+    },
+    "max_job_request_options": {
+      "title": "Maximum job request options",
+      "type": "object",
+      "fa_icon": "fab fa-acquisitions-incorporated",
+      "description": "Caps applied to every process.",
+      "help_text": "RUN_INFERCNV requests 16 CPUs by default. On a small machine lower `--max_cpus`, or the task cannot be submitted at all.",
+      "properties": {
+        "max_cpus": {
+          "type": "integer",
+          "default": 32,
+          "fa_icon": "fas fa-microchip",
+          "description": "Maximum CPUs for any single job.",
+          "hidden": true
+        },
+        "max_memory": {
+          "type": "string",
+          "default": "128.GB",
+          "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
+          "fa_icon": "fas fa-memory",
+          "description": "Maximum memory for any single job.",
+          "hidden": true
+        },
+        "max_time": {
+          "type": "string",
+          "default": "72.h",
+          "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
+          "fa_icon": "far fa-clock",
+          "description": "Maximum time for any single job.",
+          "hidden": true
+        }
+      }
+    },
+    "generic_options": {
+      "title": "Generic options",
+      "type": "object",
+      "fa_icon": "fas fa-file-import",
+      "description": "Rarely changed.",
+      "properties": {
+        "help": {
+          "type": "boolean",
+          "fa_icon": "fas fa-question-circle",
+          "description": "Print the help message and exit.",
+          "hidden": true
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/definitions/input_output_options"
+    },
+    {
+      "$ref": "#/definitions/reference_options"
+    },
+    {
+      "$ref": "#/definitions/analysis_options"
+    },
+    {
+      "$ref": "#/definitions/container_options"
+    },
+    {
+      "$ref": "#/definitions/execution_options"
+    },
+    {
+      "$ref": "#/definitions/max_job_request_options"
+    },
+    {
+      "$ref": "#/definitions/generic_options"
+    }
+  ]
+}

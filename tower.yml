@@ -1,0 +1,12 @@
+# Files surfaced in the Seqera Platform "Reports" tab after a run.
+reports:
+  combined_annotated.h5ad:
+    display: "All samples concatenated, annotated with InferCNV calls"
+  "**/infercnv_out/*.png":
+    display: "Per-sample InferCNV heatmaps"
+  "**/infercnv_out/infercnv.observations.txt":
+    display: "Per-sample inferred CNV matrix (observations)"
+  "pipeline_info/execution_report.html":
+    display: "Nextflow execution report (resources, timings, task status)"
+  "pipeline_info/execution_timeline.html":
+    display: "Nextflow execution timeline"

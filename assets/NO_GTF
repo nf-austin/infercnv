@@ -1,0 +1,6 @@
+Sentinel file, not a GTF.
+
+PREPARE_REFERENCE receives this when neither --gtf nor --gene_order was given,
+which tells it to download an Ensembl GTF with `gget ref`. It is committed to the
+repo (rather than referenced as file('NO_GTF')) so it resolves regardless of the
+launch directory -- on Seqera Platform the launch directory is the work directory.
