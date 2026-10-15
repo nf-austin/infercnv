@@ -14,7 +14,15 @@ process CLUSTER_CELLS {
     script:
     // Script lives in bin/ and is called bare: Nextflow puts $projectDir/bin on
     // PATH and bind-mounts it into the container.
+    // numba (pulled in by scanpy) JIT-caches next to its package by default,
+    // and matplotlib wants ~/.config. Neither is writable inside a read-only
+    // Singularity image or with a read-only $HOME, which makes the import die
+    // with "cannot cache function ... no locator available". Point both at the
+    // task work dir, which is always writable.
     """
+    export NUMBA_CACHE_DIR="\$PWD/.numba_cache"
+    export MPLCONFIGDIR="\$PWD/.mplconfig"
+
     cluster_cells.py \\
         --h5ad ${h5ad} \\
         --resolution ${resolution} \\
