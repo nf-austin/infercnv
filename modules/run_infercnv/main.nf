@@ -19,12 +19,15 @@ process RUN_INFERCNV {
     # task work dir rather than the host \$HOME, which is often read-only inside
     # Singularity on compute nodes (causing mamba/conda extraction to fail with
     # "cannot create directory '\$HOME/.conda': Read-only file system").
+    # Do not set CONDARC to a non-existent file, or libmamba will abort with
+    # "Configuration file specified but does not exist".
     export HOME="\$PWD"
     export XDG_CACHE_HOME="\$PWD/.cache"
     export BASILISK_EXTERNAL_DIR="\$PWD/.basilisk"
     export CONDA_ENVS_PATH="\$PWD/.conda/envs"
     export CONDA_PKGS_DIRS="\$PWD/.conda/pkgs"
-    export CONDARC="\$PWD/.condarc"
+    unset CONDARC
+    mkdir -p "\$XDG_CACHE_HOME" "\$CONDA_ENVS_PATH" "\$CONDA_PKGS_DIRS"
 
     run_infercnv.R \\
         --h5ad ${h5ad} \\
