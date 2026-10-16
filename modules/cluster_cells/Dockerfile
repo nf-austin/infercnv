@@ -9,6 +9,8 @@
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
         gawk \
         gzip \
         procps \
@@ -25,5 +27,6 @@ RUN pip install --no-cache-dir \
         h5py \
         gget
 
-# Fail the build rather than a run if an import is broken.
-RUN python3 -c 'import scanpy, anndata, pandas, numpy, scipy, h5py, leidenalg, gget; print("All packages OK")'
+# Fail the build rather than a run if an import or binary is broken.
+RUN curl --version >/dev/null \
+    && python3 -c 'import scanpy, anndata, pandas, numpy, scipy, h5py, leidenalg, gget; print("All packages OK")'

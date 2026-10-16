@@ -22,6 +22,13 @@ process PREPARE_REFERENCE {
     cp ${gtf} supplied.gtf.gz 2>/dev/null || cp ${gtf} supplied.gtf
     GTF_FILE=\$(ls supplied.gtf.gz supplied.gtf 2>/dev/null | head -1)
     """ : """
+    # Fallback for container images built before curl was added to the Dockerfile.
+    if ! command -v curl >/dev/null 2>&1; then
+        printf '#!/usr/bin/env python3\\nimport os, sys, urllib.request\\nurl = [a for a in sys.argv[1:] if not a.startswith("-")][-1]\\nurllib.request.urlretrieve(url, os.path.basename(url))\\n' > curl
+        chmod +x curl
+        export PATH="\$PWD:\$PATH"
+    fi
+
     # Download the Ensembl GTF. Needs outbound network FROM THE COMPUTE NODE,
     # which most clusters do not provide.
     gget ref -w gtf -r ${release} -d -q ${species} || {
