@@ -8,12 +8,16 @@
 # the conda fallback for the same process.
 FROM bioconductor/bioconductor_docker:RELEASE_3_20
 
+# Provision basilisk environments directly inside the R system library at build
+# time so RUN_INFERCNV never runs installConda() or touches lock files at
+# runtime inside a read-only Singularity image or offline compute node.
+ENV BASILISK_USE_SYSTEM_DIR=1
+
 RUN Rscript -e 'BiocManager::install(c("infercnv", "zellkonverter", "SummarizedExperiment"), ask=FALSE, update=FALSE)' \
  && Rscript -e 'install.packages(c("optparse"), repos="https://cran.r-project.org")'
 
-# Pre-provision basilisk's Python env at build time so RUN_INFERCNV does not
-# have to download one per task -- compute nodes usually have no outbound network.
-RUN Rscript -e 'library(zellkonverter); basilisk::basiliskStart(zellkonverter::zellkonverterAnnDataEnv()) -> p; basilisk::basiliskStop(p)' || true
+# Ensure the system-dir basilisk env is initialized and readable by any user.
+RUN Rscript -e 'library(zellkonverter); basilisk::basiliskStart(zellkonverter::zellkonverterAnnDataEnv()) -> p; basilisk::basiliskStop(p)'
 
 # Fail the build rather than a run if a library is missing.
 RUN Rscript -e 'library(infercnv); library(zellkonverter); library(SummarizedExperiment); library(optparse); library(Matrix); cat("All packages OK\n")'
